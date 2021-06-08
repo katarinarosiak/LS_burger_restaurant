@@ -1,0 +1,42 @@
+extends layout 
+
+block content 
+  h1 Launch School Burger Restaurant 
+  h3 Orders 
+
+  table 
+    thread 
+      tr 
+        th Name  
+        th Telephone 
+        th Address
+        th Order 
+    tbody
+      each entry in ordersEntries
+        tr 
+          td #{entry.name} 
+          td #{entry.tel} 
+          td #{entry.address} 
+          td #{entry.order}  
+    tfoot
+
+  a(href="/")
+    h2 Go back to Home page 
+
+
+
+  //- h2 All My Contacts
+  //- table
+  //-   thead
+  //-     tr
+  //-       th Name
+  //-       th Phone Number
+  //-   tbody
+  //-     each contact in contacts
+  //-       tr
+  //-         td #{contact.lastName}, #{contact.firstName}
+  //-         td= contact.phoneNumber
+  //-   tfoot
+  //-     tr
+  //-       td(colspan="3")
+  //-         a(href=`/contacts/new`) New Contact

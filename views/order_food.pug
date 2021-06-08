@@ -1,28 +1,35 @@
 extends layout
 
 block content
-  h1= title
+  h1 Launch School Burger Restaurant 
   h1 
   h2 Order Food 
+
+  if errorMessages && errorMessages.length > 0
+      each message in errorMessages
+        h3 #{message} 
+  
+
+
   form(action="/order_food", method="post") 
     fieldset    
       dl 
         dt 
           label(for="name") Your name:
         dd 
-          input(type="text", name="firstName")
+          input(type="text", name="name" value= name) 
         dt 
           label(for="tel") Phone number: 
         dd
-          input(type="tel", name="tel")
+          input(type="tel", name="tel", value= tel) 
         dt 
           label(for="address") Address: 
         dd 
-          input(type="text", name="address")    
+          input(type="text", name="address", value= address) 
         dt        
           label(for="Choose food to order") What would you like to order:
         dd    
-          input(type="text", name="order")
+          input(type="text", name="order", value= order)
         
 
     fieldset 

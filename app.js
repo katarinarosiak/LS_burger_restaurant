@@ -1,10 +1,14 @@
 //let = require('http-errors');
-let express = require('express');
-let path = require('path');
-// let cookieParser = require('cookie-parser');
-let morgan = require('morgan');
+const express = require('express');
+const path = require('path');
+const { body, validationResult } = require('express-validator');
+const morgan = require('morgan');
+const session = require("express-session");
+const store = require("connect-loki");
 
 let app = express();
+const LokiStore = store(session);
+
 
 const menu_items = [
   {
@@ -48,22 +52,55 @@ const menu_items = [
 
 const orders = [];
 
-
+const createValidationChain = (name) => {
+  return [
+    body(name)
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage(`The ${name} field is required.`)
+      .isLength({ max: 100 })
+      .withMessage("The maximal number of characters is 150.")
+  ];
+};
 
 // view engine setup
 app.set('views', 'views');
 app.set('view engine', 'pug');
 
-
 // app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
 app.use(express.static('public'));
-
-app.set("views", "./views");
-app.set("view engine", "pug");
-
 app.use(morgan("common"));
+
+app.use(session({
+  cookie: {
+    httpOnly: true,
+    maxAge: 31 * 24 * 60 * 60 * 1000, // 31 days in milliseconds
+    path: "/",
+    secure: false,
+  },
+  name: "ls-burger-restaurant-session-id",
+  resave: false,
+  saveUninitialized: true,
+  secret: "this is not very secure",
+  store: new LokiStore({}),
+}));
+
+const clone = object => {
+  return JSON.parse(JSON.stringify(object));
+};
+
+app.use((req, res, next) => {
+  if (!("menu_items" in req.session)) {
+    req.session.menu_items = clone(menu_items);
+  }
+
+  if (!('orders' in req.session)) {
+    req.session.orders = clone(orders);
+  }
+
+  next();
+});
 
 // catch 404 and forward to error handler
 // app.use(function (req, res, next) {
@@ -90,7 +127,7 @@ app.get('/', (req, res) => {
 app.get('/menu', (req, res) => {
   res.render('menu', {
     title: 'Launch School Burger Restaurant',
-    menu_items: menu_items
+    menu_items: req.session.menu_items
   });
 })
 
@@ -100,25 +137,45 @@ app.get('/order_food', (req, res) => {
   })
 })
 
-app.post('/order_food', (req, res) => {
-  orders.push({
-    name: req.body.firstName,
-    tel: req.body.tel,
-    address: req.body.address,
-    order: req.body.order
+app.post('/order_food', createValidationChain('name'),
+  createValidationChain('tel'),
+  createValidationChain('address'),
+  createValidationChain('order'),
+  (req, res, next) => {
+    let errors = validationResult(req);
+    if (!errors.isEmpty()) {
+
+      res.render("order_food", {
+        errorMessages: errors.array().map(error => error.msg),
+        name: req.body.name,
+        tel: req.body.tel,
+        address: req.body.address,
+        order: req.body.order
+      });
+    } else {
+      next();
+    }
+  }, (req, res) => {
+    req.session.orders.push({
+      name: req.body.name,
+      tel: req.body.tel,
+      address: req.body.address,
+      order: req.body.order
+    });
+    res.redirect('order_completed');
   });
+
+app.get('/order_completed', (req, res) => {
+  let lastOrder = req.session.orders[req.session.orders.length - 1]
   res.render('order_completed', {
-    name: req.body.firstName,
-    order: req.body.order
-  });
+    name: lastOrder.name,
+    order: lastOrder.order
+  })
+});
+
+app.get('/orders', (req, res) => {
+  res.render('orders', { ordersEntries: req.session.orders });
 })
-
-// app.get('/order_completed', (req, res) => {
-//   res.render('order_completed', {
-//     title: 'Launch School Burger Restaurant',
-//   });
-// })
-
 
 app.listen(3000, () => {
   console.log('Listening to port 3000');
