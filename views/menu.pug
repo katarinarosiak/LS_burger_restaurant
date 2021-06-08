@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  h1= title
+  h1 
+  h2 Menu
+ 
+  each item in menu_items
+    h3 #{item.header} 
+    ul
+    each dish in item.dishes 
+      li #{dish.name} #{dish.price} 
+  
+  a(href='/order_food')
+    h4 Order food
+  a(href='/')
+    h4 Go back to main page

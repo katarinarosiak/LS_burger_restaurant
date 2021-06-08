@@ -1,0 +1,32 @@
+extends layout
+
+block content
+  h1= title
+  h1 
+  h2 Order Food 
+  form(action="/order_food", method="post") 
+    fieldset    
+      dl 
+        dt 
+          label(for="name") Your name:
+        dd 
+          input(type="text", name="firstName")
+        dt 
+          label(for="tel") Phone number: 
+        dd
+          input(type="tel", name="tel")
+        dt 
+          label(for="address") Address: 
+        dd 
+          input(type="text", name="address")    
+        dt        
+          label(for="Choose food to order") What would you like to order:
+        dd    
+          input(type="text", name="order")
+        
+
+    fieldset 
+      input(type="submit", value="Place order")   
+
+  a(href='/')
+    h4 Go back to main page
