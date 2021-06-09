@@ -1,6 +1,4 @@
-//let = require('http-errors');
 const express = require('express');
-const path = require('path');
 const { body, validationResult } = require('express-validator');
 const morgan = require('morgan');
 const session = require("express-session");
@@ -64,11 +62,9 @@ const createValidationChain = (name) => {
   ];
 };
 
-// view engine setup
 app.set('views', 'views');
 app.set('view engine', 'pug');
 
-// app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static('public'));
 app.use(morgan("common"));
@@ -105,22 +101,6 @@ app.use((req, res, next) => {
 
 app.use(flash());
 
-// catch 404 and forward to error handler
-// app.use(function (req, res, next) {
-//   next(createError(404));
-// });
-
-// error handler
-// app.use(function (err, req, res, next) {
-//   // set locals, only providing error in development
-//   res.locals.message = err.message;
-//   // res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-//   // render the error page
-//   res.status(err.status || 500);
-//   res.render('error');
-// });
-
 app.get('/', (req, res) => {
   res.render('index', {
     title: 'Launch School Burger Restaurant'
@@ -147,7 +127,6 @@ app.post('/order_food', createValidationChain('name'),
   (req, res, next) => {
     let errors = validationResult(req);
     if (!errors.isEmpty()) {
-      //create an object with error messages, error as a key and message as value
       errors.array().forEach(error => req.flash("error", error.msg))
 
       res.render("order_food", {
