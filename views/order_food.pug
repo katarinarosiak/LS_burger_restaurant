@@ -5,12 +5,13 @@ block content
   h1 
   h2 Order Food 
 
-  if errorMessages && errorMessages.length > 0
-      each message in errorMessages
-        h3 #{message} 
+  - let errorTypes = Object.keys(flash || {})
+  if errorTypes.length > 0
+    each errorType in errorTypes 
+      each message in flash[errorType]
+        h3= message 
+
   
-
-
   form(action="/order_food", method="post") 
     fieldset    
       dl 

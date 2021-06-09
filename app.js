@@ -5,6 +5,7 @@ const { body, validationResult } = require('express-validator');
 const morgan = require('morgan');
 const session = require("express-session");
 const store = require("connect-loki");
+const flash = require("express-flash");
 
 let app = express();
 const LokiStore = store(session);
@@ -102,6 +103,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(flash());
+
 // catch 404 and forward to error handler
 // app.use(function (req, res, next) {
 //   next(createError(404));
@@ -144,9 +147,11 @@ app.post('/order_food', createValidationChain('name'),
   (req, res, next) => {
     let errors = validationResult(req);
     if (!errors.isEmpty()) {
+      //create an object with error messages, error as a key and message as value
+      errors.array().forEach(error => req.flash("error", error.msg))
 
       res.render("order_food", {
-        errorMessages: errors.array().map(error => error.msg),
+        flash: req.flash(),
         name: req.body.name,
         tel: req.body.tel,
         address: req.body.address,
